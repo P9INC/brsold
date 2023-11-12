@@ -1,50 +1,22 @@
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.1) until game:IsLoaded() end
 loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
-getgenv().AutoRandomSurprise = true
-getgenv().DitBF = {
-    ["Performance"] = {
-        ["Hide Map"] = false,
-        ["Black Screen"] = true,
-        ["Lock FPS"] = 60,
-    },
-    ["Fast Attack Duration/Cooldown"] = {3, 6},
-    ["Raid if Maxed Blox Fruit"] = true,
-    ["Farm boss drops while not maxed"] = false,
-    ["Farm Blox Fruit Mastery if maxed"] = true,
-    ["Farm method after maxed"] = "Raid Boss Farm - Cake Prince Farm",
-    ["Extra time Farm until unlock skills"] = true,
-    ["Hop Server"] = {
-        ["Type"] = {
-            ["[Main] Server Hop"] = false,
-            ["[Farm] Server Hop if Player nearby"] = false,
-            ["[Sea 3 Quest] Server Hop for 1M+ Blox Fruit"] = false,
-        },
-        ["Delay"] = 0,
-    },
-    ["Do Action"] = {
-        ["Get Godhuman"] = true,
-        ["Get Rengoku"] = false,
-        ["Get True Triple Katana"] = false,
-        ["Get Hallow Scythe"] = false,
-        ["Get Cursed Dual Katana"] = true,
-        ["Get Soul Guitar"] = false,
-        ["Awake Current Blox Fruit"] = false,
-        ["Get Mirror Fractal"] = true,
-    },
-    ["Buy Haki"] = {
-        ["Enhancement"] = true,
-        ["Skyjump"] = true,
-        ["Flash Step"] = true,
-        ["Observation"] = true,
-        ["Legendary Enhancement"] = true,
-    },
-    ["Auto Race"] = "None",
-    ["Blox Fruit Sniper"] = {"Flame-Flame","Ice-Ice","Sand-Sand","Dark-Dark","Light-Light","Magma-Magma","Buddha-Buddha",},
-    ["Main Blox Fruit"] = {"Dough-Dough"},
-    ["Eat Sniper Blox Fruits"] = true
+_G.Delay_Upload = 300 -- โชว์ข้อมูลใหม่ทุกๆ 300วิ
+_G.Select_Fruit = {
+    ['Main'] = {'Dough-Dough'}, -- เลือกผลปีศาจหลัก
+    ['Select Fruit'] = {'Sound-Sound','Dark-Dark','Buddha-Buddha','Light-Light','Magma-Magma'} -- เลือกผลปีศาจ
 }
-getgenv().Key = "k6635e3ca0a52bd6bb49950f"
-loadstring(game:HttpGet("https://ditbloxfruit.cc/client.lua"))()
+_G.Mastery_Farm = { -- ฟามมาสเตอรี่
+    ['Melee'] = true,
+    ['Devil Fruit'] = true,
+    ['Sword'] = false,
+    ['Gun'] = false
+}
+_G.Race_Evo = {
+    ['Level'] = {1,2,3}, -- อีโวเผ่าจากขั้น0 ไปถึงขั้น3
+    ['Enabled'] = true
+}
+script_key="nuTwfSYyjkezQtiLYePYrSGYGWVlhQKN";
+loadstring(game:HttpGet("https://raw.githubusercontent.com/londnee/code/main/m.lua"))()
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local WindowFocusReleasedFunction = function()
