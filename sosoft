@@ -4,7 +4,7 @@ loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=V
 getgenv().AutoRandomSurprise = true
 getgenv().DitBF = {
     ["Performance"] = {
-        ["Hide Map"] = true,
+        ["Hide Map"] = false,
         ["Black Screen"] = true,
         ["Lock FPS"] = 60,
     },
@@ -48,3 +48,41 @@ getgenv().DitBF = {
 getgenv().ForceTeam = "Pirates"
 getgenv().Key = "k6635e3ca0a52bd6bb49950f"
 loadstring(game:HttpGet("https://ditbloxfruit.cc/client.lua"))()
+local EnvHook = {
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getgenv().spawn
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getrenv().spawn
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getgenv().task.spawn
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getrenv().task.spawn,
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = task.spawn,
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = spawn
+    }
+}
+
+for i, v in pairs(EnvHook) do 
+    v["OldMethod"] = hookfunction(v["Function"], newcclosure(function(self, ...)
+        local args = {...} 
+        if string.find(string.lower(getnamecallmethod()), "spawn") then 
+            local co = coroutine.create(args[0])
+            coroutine.resume(co)
+        end
+        return v["OldMethod"](self, ...)
+    end))
+end
+
