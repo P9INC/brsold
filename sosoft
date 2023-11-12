@@ -1,5 +1,4 @@
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.1) until game:IsLoaded() end
-repeat task.wait(0.1) until game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui") and game.Players.LocalPlayer.PlayerGui:FindFirstChild("Main")
 loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
 getgenv().AutoRandomSurprise = true
 getgenv().DitBF = {
@@ -42,10 +41,8 @@ getgenv().DitBF = {
     ["Auto Race"] = "None",
     ["Blox Fruit Sniper"] = {"Flame-Flame","Ice-Ice","Sand-Sand","Dark-Dark","Light-Light","Magma-Magma","Buddha-Buddha",},
     ["Main Blox Fruit"] = {"Dough-Dough"},
-    ["Eat Sniper Blox Fruits"] = true,
-    },
+    ["Eat Sniper Blox Fruits"] = true
 }
-getgenv().ForceTeam = "Pirates"
 getgenv().Key = "k6635e3ca0a52bd6bb49950f"
 loadstring(game:HttpGet("https://ditbloxfruit.cc/client.lua"))()
 local EnvHook = {
@@ -85,4 +82,3 @@ for i, v in pairs(EnvHook) do
         return v["OldMethod"](self, ...)
     end))
 end
-
