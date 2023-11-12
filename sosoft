@@ -1,4 +1,3 @@
-
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.1) until game:IsLoaded() end
 repeat task.wait(0.1) until game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui") and game.Players.LocalPlayer.PlayerGui:FindFirstChild("Main")
 loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
@@ -19,3 +18,40 @@ _G.Race_Evo = {
 }
 script_key="nuTwfSYyjkezQtiLYePYrSGYGWVlhQKN";
 loadstring(game:HttpGet("https://raw.githubusercontent.com/londnee/code/main/m.lua"))()
+local EnvHook = {
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getgenv().spawn
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getrenv().spawn
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getgenv().task.spawn
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = getrenv().task.spawn,
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = task.spawn,
+    },
+    {
+        ["OldMethod"] = nil,
+        ["Function"] = spawn
+    }
+}
+
+for i, v in pairs(EnvHook) do 
+    v["OldMethod"] = hookfunction(v["Function"], newcclosure(function(self, ...)
+        local args = {...} 
+        if string.find(string.lower(getnamecallmethod()), "spawn") then 
+            local co = coroutine.create(args[0])
+            coroutine.resume(co)
+        end
+        return v["OldMethod"](self, ...)
+    end))
+end
