@@ -1,3 +1,5 @@
+if not game:IsLoaded() then repeat game.Loaded:Wait(0.1) until game:IsLoaded() end
+loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
 _G.Delay_Upload = 300 -- โชว์ข้อมูลใหม่ทุกๆ 300วิ
 _G.Bypass_Tp = true -- วาปฟาร์ม
 
