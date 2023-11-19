@@ -4,7 +4,6 @@ _G.Fruits_Settings = {
     ['Main_Fruits'] = {'Sound-Sound'},
     ['Select_Fruits'] = {"Ice-Ice", "Light-Light", "Dark-Dark", "Rumble-Rumble", "Magma-Magma"} 
 }
-
 getgenv().Key = "MARU-5C12C-AYXIT-N9PA-WMKOC-MD4O"
 getgenv().id = "373060821346942986"
 getgenv().Script_Mode = "Kaitun_Script"
