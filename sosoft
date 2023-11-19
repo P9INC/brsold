@@ -1,5 +1,5 @@
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.5) until game:IsLoaded() end
-loadstring(game:HttpGet("https://raw.githubusercontent.com/P9INC/brsold/main/loadgen", true))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/P9INC/brsold/main/loadgen"))()
 _G.Fruits_Settings = {
     ['Main_Fruits'] = {'Sound-Sound'},
     ['Select_Fruits'] = {"Ice-Ice", "Light-Light", "Dark-Dark", "Rumble-Rumble", "Magma-Magma"} 
