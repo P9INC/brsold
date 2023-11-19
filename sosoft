@@ -1,4 +1,5 @@
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.5) until game:IsLoaded() end
+loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
 _G.Fruits_Settings = {
     ['Main_Fruits'] = {'Sound-Sound'},
     ['Select_Fruits'] = {"Ice-Ice", "Light-Light", "Dark-Dark", "Rumble-Rumble", "Magma-Magma"} 
@@ -8,7 +9,6 @@ getgenv().Key = "MARU-5C12C-AYXIT-N9PA-WMKOC-MD4O"
 getgenv().id = "373060821346942986"
 getgenv().Script_Mode = "Kaitun_Script"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
-loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local WindowFocusReleasedFunction = function()
