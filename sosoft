@@ -9,7 +9,9 @@ getgenv().Key = "MARU-5C12C-AYXIT-N9PA-WMKOC-MD4O"
 getgenv().id = "373060821346942986"
 getgenv().Script_Mode = "Kaitun_Script"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
-UserSettings():GetService("UserGameSettings").MasterVolume = 0
+pcall(function()
+	UserSettings():GetService("UserGameSettings").MasterVolume = 0
+end)
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local WindowFocusReleasedFunction = function()
