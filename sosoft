@@ -1,6 +1,6 @@
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.5) until game:IsLoaded() end
 repeat task.wait(0.1) until game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui") and game.Players.LocalPlayer.PlayerGui:FindFirstChild("Main")
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Instantxs/Genhub/main/son.txt"))()
+loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
 _G.Fruits_Settings = {
     ['Main_Fruits'] = {'Dough-Dough','Sound-Sound'},
     ['Select_Fruits'] = {"Buddha-Buddha","Ice-Ice", "Light-Light", "Dark-Dark", "Rumble-Rumble", "Magma-Magma"} 
