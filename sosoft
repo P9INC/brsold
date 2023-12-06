@@ -21,7 +21,7 @@ _G.Delay_Upload = 300 -- โชว์ข้อมูลใหม่ทุกๆ 
 _G.Bypass_Tp = true -- วาปฟาร์ม
 _G.Select_Fruit = {
     ['Main'] = {'Dough-Dough','Sound-Sound'}, -- เลือกผลปีศาจหลัก
-    ['Select Fruit'] = {'Dark-Dark','Buddha-Buddha','Light-Light','Magma-Magma} -- เลือกผลปีศาจ
+    ['Select Fruit'] = {'Dark-Dark','Buddha-Buddha','Light-Light','Magma-Magma'} -- เลือกผลปีศาจ
 }
 _G.Mastery_Farm = { -- ฟามมาสเตอรี่
     ['Melee'] = true,
