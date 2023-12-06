@@ -1,5 +1,8 @@
 if not game:IsLoaded() then repeat game.Loaded:Wait(0.1) until game:IsLoaded() end
 loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
+pcall(function()
+	UserSettings():GetService("UserGameSettings").MasterVolume = 0
+end)
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local WindowFocusReleasedFunction = function()
@@ -27,8 +30,8 @@ end
 local world = GetWorld() 
 if world ~= 3 then
 _G.Fruits_Settings = {
-    ['Main_Fruits'] = {'Dough-Dough', 'Sound-Sound'},
-    ['Select_Fruits'] = {"Ice-Ice", "Light-Light", "Dark-Dark", "Rumble-Rumble", "Magma-Magma"} 
+    ['Main_Fruits'] = {'Dough-Dough','Sound-Sound'},
+    ['Select_Fruits'] = {"Buddha-Buddha", "Dark-Dark", "Light-Light", "Ice-Ice", "Magma-Magma"} 
 }
 getgenv().Key = "MARU-GCDC-DFBJ3-6HYV-RZ4FW-A4YA"
 getgenv().id = "302097681378181121"
