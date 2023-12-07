@@ -45,7 +45,7 @@ getgenv().DitBF = {
     ["Main Blox Fruit"] = {"Dough-Dough"},
     ["Eat Sniper Blox Fruits"] = true,
     }
-}
+
 getgenv().ForceTeam = "Pirates"
 getgenv().Key = "k6635e3ca0a52bd6bb49950f"
 loadstring(game:HttpGet("https://ditbloxfruit.cc/client.lua"))()
