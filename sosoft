@@ -9,7 +9,7 @@ getgenv().DitBF = {
         ["Black Screen"] = true,
         ["Lock FPS"] = 60,
     },
-    ["Fast Attack Duration/Cooldown"] = {3, 6},
+    ["Fast Attack Duration/Cooldown"] = {2, 5},
     ["Raid if Maxed Blox Fruit"] = true,
     ["Farm boss drops while not maxed"] = false,
     ["Farm Blox Fruit Mastery if maxed"] = true,
