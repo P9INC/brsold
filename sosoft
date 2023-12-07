@@ -44,7 +44,7 @@ getgenv().DitBF = {
     ["Blox Fruit Sniper"] = {"Flame-Flame","Ice-Ice","Sand-Sand","Dark-Dark","Light-Light","Magma-Magma","Buddha-Buddha",},
     ["Main Blox Fruit"] = {"Dough-Dough"},
     ["Eat Sniper Blox Fruits"] = true,
-    },
+    }
 }
 getgenv().ForceTeam = "Pirates"
 getgenv().Key = "k6635e3ca0a52bd6bb49950f"
