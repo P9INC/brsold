@@ -2,53 +2,126 @@ if not game:IsLoaded() then repeat game.Loaded:Wait(0.1) until game:IsLoaded() e
 repeat task.wait(0.1) until game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui") and game.Players.LocalPlayer.PlayerGui:FindFirstChild("Main")
 task.wait(5)
 loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscript_log/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
-getgenv().AutoRandomSurprise = true
-getgenv().DitBF = {
-    ["Performance"] = {
-        ["Hide Map"] = false,
-        ["Black Screen"] = true,
-        ["Lock FPS"] = 60,
-    },
-    ["Fast Attack Duration/Cooldown"] = {2, 5},
-    ["Raid if Maxed Blox Fruit"] = true,
-    ["Farm boss drops while not maxed"] = false,
-    ["Farm Blox Fruit Mastery if maxed"] = true,
-    ["Farm method after maxed"] = "Raid Boss Farm - Cake Prince Farm",
-    ["Extra time Farm until unlock skills"] = true,
-    ["Hop Server"] = {
-        ["Type"] = {
-            ["[Main] Server Hop"] = false,
-            ["[Farm] Server Hop if Player nearby"] = false,
-            ["[Sea 3 Quest] Server Hop for 1M+ Blox Fruit"] = false,
+
+-- HOP
+local foundAnything = ""
+function HopServer()
+    local PlaceID = game.PlaceId
+    local Site
+    local actualHour = os.date("!*t").hour
+    local Deleted = false
+    local RecentJoined = {}
+    local iv = 0
+    repeat
+        if foundAnything == "" then
+            Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' ..
+                PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+        else
+            Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' ..
+                PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+        end
+        local ID = ""
+        if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+            foundAnything = Site.nextPageCursor
+        end
+        local num = 0;
+        for i, v in pairs(Site.data) do
+            local Possible = true
+            ID = tostring(v.id)
+            if v.playing ~= nil and tonumber(v.maxPlayers) > (tonumber(v.playing) + 3) then
+                print("HOP TO .. " .. tostring(v.id))
+                game:GetService("ReplicatedStorage").__ServerBrowser:InvokeServer("teleport", v.id)
+                task.wait(3)
+            end
+        end
+        iv = iv + 1
+    until iv >= 3
+end
+-- END HOP
+
+if (game.Players.LocalPlayer.Data.Level.Value < 2000) then
+    -- เต่าน้อย
+    getgenv().AutoRandomSurprise = true
+    getgenv().DitBF = {
+        ["Performance"] = {
+            ["Hide Map"] = false,
+            ["Black Screen"] = true,
+            ["Lock FPS"] = 60,
         },
-        ["Delay"] = 0,
-    },
-    ["Do Action"] = {
-        ["Get Godhuman"] = true,
-        ["Get Rengoku"] = false,
-        ["Get True Triple Katana"] = false,
-        ["Get Hallow Scythe"] = false,
-        ["Get Cursed Dual Katana"] = true,
-        ["Get Soul Guitar"] = false,
-        ["Awake Current Blox Fruit"] = false,
-        ["Get Mirror Fractal"] = true,
-    },
-    ["Buy Haki"] = {
-        ["Enhancement"] = true,
-        ["Skyjump"] = true,
-        ["Flash Step"] = true,
-        ["Observation"] = true,
-        ["Legendary Enhancement"] = true,
-    },
-    ["Auto Race"] = "None",
-    ["Blox Fruit Sniper"] = {"Flame-Flame","Ice-Ice","Sand-Sand","Dark-Dark","Light-Light","Magma-Magma","Buddha-Buddha",},
-    ["Main Blox Fruit"] = {"Dough-Dough"},
-    ["Eat Sniper Blox Fruits"] = true,
+        ["Fast Attack Duration/Cooldown"] = {2, 5},
+        ["Raid if Maxed Blox Fruit"] = true,
+        ["Farm boss drops while not maxed"] = false,
+        ["Farm Blox Fruit Mastery if maxed"] = true,
+        ["Farm method after maxed"] = "Raid Boss Farm - Cake Prince Farm",
+        ["Extra time Farm until unlock skills"] = true,
+        ["Hop Server"] = {
+            ["Type"] = {
+                ["[Main] Server Hop"] = false,
+                ["[Farm] Server Hop if Player nearby"] = false,
+                ["[Sea 3 Quest] Server Hop for 1M+ Blox Fruit"] = false,
+            },
+            ["Delay"] = 0,
+        },
+        ["Do Action"] = {
+            ["Get Godhuman"] = true,
+            ["Get Rengoku"] = false,
+            ["Get True Triple Katana"] = false,
+            ["Get Hallow Scythe"] = false,
+            ["Get Cursed Dual Katana"] = true,
+            ["Get Soul Guitar"] = false,
+            ["Awake Current Blox Fruit"] = false,
+            ["Get Mirror Fractal"] = true,
+        },
+        ["Buy Haki"] = {
+            ["Enhancement"] = true,
+            ["Skyjump"] = true,
+            ["Flash Step"] = true,
+            ["Observation"] = true,
+            ["Legendary Enhancement"] = true,
+        },
+        ["Auto Race"] = "None",
+        ["Blox Fruit Sniper"] = {"Flame-Flame","Ice-Ice","Sand-Sand","Dark-Dark","Light-Light","Magma-Magma","Buddha-Buddha",},
+        ["Main Blox Fruit"] = {"Dough-Dough","Sound-Sound"},
+        ["Eat Sniper Blox Fruits"] = true,
+        }
+
+    getgenv().ForceTeam = "Pirates"
+    getgenv().Key = "k6635e3ca0a52bd6bb49950f"
+    loadstring(game:HttpGet("https://ditbloxfruit.cc/client.lua"))()
+
+    spawn(function()
+        while task.wait(5) do
+            pcall(function()
+                if (game.Players.LocalPlayer.Data.Level.Value >= 2000) then
+                    HopServer()
+                    task.wait(5)
+                end
+            end)
+        end
+    end)
+else
+    -- สวิทกัง
+    _G.Delay_Upload = 300 -- โชว์ข้อมูลใหม่ทุกๆ 300วิ
+    _G.Bypass_Tp = true -- วาปฟาร์ม
+    _G.Select_Fruit = {
+        ['Main'] = {'Dough-Dough','Sound-Sound'}, -- เลือกผลปีศาจหลัก
+        ['Select Fruit'] = {'Dark-Dark','Buddha-Buddha','Light-Light','Magma-Magma'}, -- เลือกผลปีศาจ
+    }
+    _G.Mastery_Farm = { -- ฟามมาสเตอรี่
+        ['Melee'] = true,
+        ['Devil Fruit'] = true,
+        ['Sword'] = true,
+        ['Gun'] = false
+    }
+    _G.Race_Evo = {
+        ['Level'] = {1,2,3}, -- อีโวเผ่าจากขั้น0 ไปถึงขั้น3
+        ['Enabled'] = true
     }
 
-getgenv().ForceTeam = "Pirates"
-getgenv().Key = "k6635e3ca0a52bd6bb49950f"
-loadstring(game:HttpGet("https://ditbloxfruit.cc/client.lua"))()
+    script_key="nuTwfSYyjkezQtiLYePYrSGYGWVlhQKN";
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/londnee/code/main/m.lua"))()
+end
+
 pcall(function()
 	UserSettings():GetService("UserGameSettings").MasterVolume = 0
 end)
