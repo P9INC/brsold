@@ -5,8 +5,8 @@ _G.Fruits_Settings = {
     ['Main_Fruits'] = {'Dough-Dough','Sound-Sound'},
     ['Select_Fruits'] = {"Buddha-Buddha", "Dark-Dark", "Light-Light", "Ice-Ice", "Magma-Magma"} 
 }
-getgenv().Key = "MARU-GCDC-DFBJ3-6HYV-RZ4FW-A4YA"
-getgenv().id = "302097681378181121"
+getgenv().Key = "MARU-OC1Y-W8FIT-I3B6-YXHEE-4WOF"
+getgenv().id = "369777743816294402"
 getgenv().Script_Mode = "Kaitun_Script"
 loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
 pcall(function()
