@@ -10,15 +10,16 @@ _G.Fruits_Settings = {
 getgenv().Key = "MARU-OC1Y-W8FIT-I3B6-YXHEE-4WOF"
 getgenv().id = "369777743816294402"
 getgenv().Script_Mode = "Kaitun_Script"
-loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
-spawn(function()
+coroutine.wrap(function()
     local Maruload = false;
     local MaruloadTime = tick();
     while task.wait(5) do
         pcall(function()
             if (tostring(type(_G.MainSettings)) ~= "table") then
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
-                task.wait(5)
+                coroutine.wrap(function()
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
+                end)()
+                task.wait(20)
             end
 
             if (_G.Genlog == nil) then
@@ -27,7 +28,7 @@ spawn(function()
             end
         end)
     end
-end)
+end)()
 
 pcall(function()
     UserSettings():GetService("UserGameSettings").MasterVolume = 0
