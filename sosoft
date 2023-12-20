@@ -12,14 +12,25 @@ getgenv().id = "369777743816294402"
 getgenv().Script_Mode = "Kaitun_Script"
 coroutine.wrap(function()
     local Maruload = false;
-    local MaruloadTime = tick();
+    local LoadQueue = false
+    local LoadTimeOut = tick()
     while task.wait(5) do
         pcall(function()
             if (tostring(type(_G.MainSettings)) ~= "table") then
-                coroutine.wrap(function()
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua"))()
-                end)()
-                task.wait(20)
+                if (LoadQueue == false) then
+                    print("LOAD MARU")
+                    coroutine.wrap(function()
+                        LoadQueue = true
+                        LoadTimeOut = tick()
+                        loadstring(game:HttpGet("https://raw.githubusercontent.com/xshiba/MaruBitkub/main/Mobile.lua", true))()
+                        LoadQueue = false
+                    end)()
+                else
+                    if (tick() - LoadTimeOut) >= 40 then
+                        LoadQueue = false
+                    end
+                end
+                task.wait(5)
             end
 
             if (_G.Genlog == nil) then
