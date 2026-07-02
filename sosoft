@@ -42,7 +42,7 @@ task.spawn(function()
             task.wait(0.2)
         end
 
-        -- อ่านข้อความในปุ่ม (รวม label ลูก ๆ) เป็นตัวพิมพ์เล็ก
+        -- อ่านข้อความในปุ่ม (รวม label ลูก ๆ) -> ตัวพิมพ์เล็ก + ตัดช่องว่างหัวท้าย
         local function buttonText(btn)
             local t = ""
             if btn:IsA("TextLabel") or btn:IsA("TextButton") then
@@ -53,22 +53,28 @@ task.spawn(function()
                     t = t .. " " .. d.Text
                 end
             end
-            return string.lower(t)
+            t = string.lower(t)
+            t = t:gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")  -- ยุบช่องว่าง + trim
+            return t
         end
 
-        -- หาปุ่ม "Block" ยืนยัน จาก container ของปุ่ม (ไม่ hardcode index)
+        -- หาปุ่ม "Block" ล้วน ๆ (ไม่เอา "Block and report" / "Cancel")
         local function findConfirmButton(buttonsContainer)
             local kids = buttonsContainer:GetChildren()
+            local fallback
             for _, btn in ipairs(kids) do
                 local txt = buttonText(btn)
-                -- รองรับทั้งภาษาอังกฤษและไทย, และกันไม่ให้ไปโดน Cancel/ยกเลิก
-                if (txt:find("block") or txt:find("บล็อก"))
-                    and not txt:find("cancel") and not txt:find("ยกเลิก") then
-                    return btn
+                -- ข้ามปุ่มที่ไม่ต้องการ: ยกเลิก และ รายงาน
+                if txt:find("cancel") or txt:find("ยกเลิก")
+                    or txt:find("report") or txt:find("รายงาน") then
+                    -- ข้าม
+                elseif txt == "block" or txt == "บล็อก" then
+                    return btn                         -- ตรงเป๊ะ = ปุ่ม Block ล้วน (ดีสุด)
+                elseif (txt:find("block") or txt:find("บล็อก")) and not fallback then
+                    fallback = btn                     -- เผื่อไม่เจอแบบเป๊ะ
                 end
             end
-            -- fallback: ปุ่มยืนยันมักเป็นปุ่มสุดท้าย
-            return kids[#kids]
+            return fallback
         end
 
         -- หา modal บล็อก + กดปุ่มยืนยัน (recursive ทนต่อการเปลี่ยน UI)
@@ -131,6 +137,7 @@ task.spawn(function()
         end
     end)
 end)
+
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
 end)
