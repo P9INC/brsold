@@ -1,88 +1,136 @@
-    task.spawn(function()
-        pcall(function()
-            local Players = game:GetService("Players")
-            local StarterGui = game:GetService("StarterGui")
-            local CoreGui = game:GetService("CoreGui")
-            local LocalPlayer = Players.LocalPlayer
-            
-            local function IsBlocked(userId)
-                return table.find(StarterGui:GetCore("GetBlockedUserIds"), userId)
+task.spawn(function()
+    pcall(function()
+        local Players = game:GetService("Players")
+        local StarterGui = game:GetService("StarterGui")
+        local CoreGui = game:GetService("CoreGui")
+        local GuiService = game:GetService("GuiService")
+        local VIM = game:GetService("VirtualInputManager")
+        local LocalPlayer = Players.LocalPlayer
+
+        local function IsBlocked(userId)
+            local ok, list = pcall(function()
+                return StarterGui:GetCore("GetBlockedUserIds")
+            end)
+            if ok and type(list) == "table" then
+                return table.find(list, userId) ~= nil
             end
-            
-            local interact = function(path)
-                game:GetService("GuiService").SelectedObject = path
+            return false
+        end
+
+        -- กดปุ่มด้วยคีย์บอร์ด (โฟกัส + Enter)
+        local interact = function(path)
+            if typeof(path) ~= "Instance" then return end
+            GuiService.SelectedObject = path
+            task.wait()
+            if GuiService.SelectedObject == path then
+                VIM:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+                VIM:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
                 task.wait()
-                if game:GetService("GuiService").SelectedObject == path then
-                    game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-                    game:GetService("VirtualInputManager"):SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-                    task.wait()
+            end
+            GuiService.SelectedObject = nil
+        end
+
+        -- กดปุ่มด้วยเมาส์ (fallback เผื่อคีย์บอร์ดโฟกัสไม่ติด)
+        local interact_2 = function(path)
+            if typeof(path) ~= "Instance" then return end
+            if path.AbsoluteSize.X == 0 then return end            -- ปุ่มหายแล้ว ไม่ต้องคลิก
+            local centerX = path.AbsolutePosition.X + path.AbsoluteSize.X / 2
+            local centerY = path.AbsolutePosition.Y + path.AbsoluteSize.Y / 2 + 63
+            VIM:SendMouseButtonEvent(centerX, centerY, 0, true, path, 2)
+            task.wait(0.1)
+            VIM:SendMouseButtonEvent(centerX, centerY, 0, false, path, 2)
+            task.wait(0.2)
+        end
+
+        -- อ่านข้อความในปุ่ม (รวม label ลูก ๆ) เป็นตัวพิมพ์เล็ก
+        local function buttonText(btn)
+            local t = ""
+            if btn:IsA("TextLabel") or btn:IsA("TextButton") then
+                t = t .. " " .. btn.Text
+            end
+            for _, d in ipairs(btn:GetDescendants()) do
+                if d:IsA("TextLabel") or d:IsA("TextButton") then
+                    t = t .. " " .. d.Text
                 end
-                game:GetService("GuiService").SelectedObject = nil
-                wait(1)
             end
-            
-            local function ProcessBlock()
-                CoreGui = game:GetService("CoreGui")
+            return string.lower(t)
+        end
 
-                pcall(function()
-                    interact(CoreGui.FoundationOverlay.SafeAreaFrame.BlockingModalScreen.BlockingModalContainerWrapper.BlockingModal.AlertModal.AlertContents.Footer.Buttons["3"])
-                end)
-                pcall(function()
-                    interact(CoreGui.FoundationOverlay.BlockingModalScreen.BlockingModalContainerWrapper.BlockingModal.AlertModal.AlertContents.Footer.Buttons["3"])
-                end)
-                pcall(function()
-                    interact(CoreGui.BlockingModalScreen.BlockingModalContainer.BlockingModalContainerWrapper.BlockingModal.AlertModal.AlertContents.Footer.Buttons["3"])
-                end)
+        -- หาปุ่ม "Block" ยืนยัน จาก container ของปุ่ม (ไม่ hardcode index)
+        local function findConfirmButton(buttonsContainer)
+            local kids = buttonsContainer:GetChildren()
+            for _, btn in ipairs(kids) do
+                local txt = buttonText(btn)
+                -- รองรับทั้งภาษาอังกฤษและไทย, และกันไม่ให้ไปโดน Cancel/ยกเลิก
+                if (txt:find("block") or txt:find("บล็อก"))
+                    and not txt:find("cancel") and not txt:find("ยกเลิก") then
+                    return btn
+                end
             end
-            
-            local interact_2 = function(path)
-                if typeof(path) ~= "Instance" then return end;
-                local centerX = path.AbsolutePosition.X + path.AbsoluteSize.X / 2
-                local centerY = path.AbsolutePosition.Y + path.AbsoluteSize.Y / 2 + 63
-                game:GetService("VirtualInputManager"):SendMouseButtonEvent(centerX, centerY, 0, true, path, 2)
-                wait(0.1)
-                game:GetService("VirtualInputManager"):SendMouseButtonEvent(centerX, centerY, 0, false, path, 2)
-                wait(0.3);
+            -- fallback: ปุ่มยืนยันมักเป็นปุ่มสุดท้าย
+            return kids[#kids]
+        end
+
+        -- หา modal บล็อก + กดปุ่มยืนยัน (recursive ทนต่อการเปลี่ยน UI)
+        local function ProcessBlock()
+            CoreGui = game:GetService("CoreGui")
+            local modal = CoreGui:FindFirstChild("BlockingModal", true)
+                or CoreGui:FindFirstChild("AlertModal", true)
+            if not modal then return false end
+
+            local buttons = modal:FindFirstChild("Buttons", true)
+            if not buttons then return false end
+
+            local confirm = findConfirmButton(buttons)
+            if not confirm then return false end
+
+            interact(confirm)             -- ลองคีย์บอร์ดก่อน
+            task.wait(0.3)
+            if confirm.Parent then        -- ถ้า modal ยังอยู่ = ยังไม่สำเร็จ -> ลองเมาส์
+                interact_2(confirm)
             end
+            return true
+        end
 
-            while true do 
-                task.wait(1)
+        while true do
+            task.wait(1)
 
-                pcall(function()
-                    -- CLOSE SPINNER COUSIN
-                    if game:GetService("Players").LocalPlayer.PlayerGui.SpinnerWindow.Enabled == true then
-                        interact_2(game:GetService("Players").LocalPlayer.PlayerGui.SpinnerWindow.AboveSpinner.Navigation.CloseButton)
-                        interact_2(game:GetService("Players").LocalPlayer.PlayerGui.SpinnerWindow.CloseButton)
+            -- ปิด SpinnerWindow ถ้าเด้งขึ้น
+            pcall(function()
+                local pg = LocalPlayer:FindFirstChild("PlayerGui")
+                local sw = pg and pg:FindFirstChild("SpinnerWindow")
+                if sw and sw.Enabled == true then
+                    local above = sw:FindFirstChild("AboveSpinner")
+                    if above then
+                        local nav = above:FindFirstChild("Navigation")
+                        if nav and nav:FindFirstChild("CloseButton") then
+                            interact_2(nav.CloseButton)
+                        end
                     end
-                end)
-
-                pcall(function()
-                    for _, player in pairs(Players:GetPlayers()) do
-                        if player == LocalPlayer or IsBlocked(player.UserId) then continue end
-        
-                        local attemp = 0
-        
-                        repeat  
-                            StarterGui:SetCore("PromptBlockPlayer", player)
-
-                            CoreGui:WaitForChild("BlockingModalScreen", 5)
-
-                            if CoreGui:FindFirstChild("BlockingModalScreen") then
-                                pcall(ProcessBlock)
-                            elseif CoreGui:FindFirstChild("FoundationOverlay") then
-                                pcall(ProcessBlock)
-                            end
-
-                            attemp = attemp + 1
-        
-                            task.wait(1)
-                        until attemp >= 10 or IsBlocked(player.UserId) 
+                    if sw:FindFirstChild("CloseButton") then
+                        interact_2(sw.CloseButton)
                     end
-                end)
-            end
-        end) 
+                end
+            end)
+
+            -- วนบล็อกผู้เล่นทุกคน
+            pcall(function()
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player == LocalPlayer or IsBlocked(player.UserId) then continue end
+
+                    local attemp = 0
+                    repeat
+                        StarterGui:SetCore("PromptBlockPlayer", player)
+                        task.wait(1)              -- รอ modal เด้ง
+                        pcall(ProcessBlock)
+                        attemp = attemp + 1
+                        task.wait(1)              -- รอ block list อัปเดต
+                    until attemp >= 10 or IsBlocked(player.UserId)
+                end
+            end)
+        end
     end)
-
+end)
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
 end)
