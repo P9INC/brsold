@@ -115,7 +115,7 @@ task.spawn(function()
             return ok and res == true
         end
 
-        -- ส่งคำขอเป็นเพื่อน: ยิง API ตรงก่อน ถ้าไม่ได้ค่อย fallback เป็น prompt
+        -- เปิด prompt ส่งคำขอเพื่อน (ยิง API ตรงก่อน ถ้าไม่ได้ค่อย fallback เป็น prompt)
         local function ProcessAddFriend(player)
             local ok = pcall(function()
                 LocalPlayer:RequestFriendship(player)
@@ -126,6 +126,57 @@ task.spawn(function()
                 end)
             end
         end
+
+        -- หาปุ่ม "Send Request" ล้วน ๆ (ไม่เอา Cancel)
+        local function findFriendButton(buttonsContainer)
+            local fallback
+            for _, btn in ipairs(buttonsContainer:GetChildren()) do
+                local txt = buttonText(btn)
+                if txt:find("cancel") or txt:find("ยกเลิก") then
+                    -- ข้าม
+                elseif txt == "send request" or txt == "send friend request" or txt == "ส่งคำขอ" then
+                    return btn                         -- ตรงเป๊ะ = ปุ่มส่งคำขอ (ดีสุด)
+                elseif (txt:find("send") or txt:find("request") or txt:find("คำขอ")) and not fallback then
+                    fallback = btn                     -- เผื่อไม่เจอแบบเป๊ะ
+                end
+            end
+            return fallback
+        end
+
+        -- หา modal คำขอเพื่อน + กดปุ่ม "Send Request"
+        local function ProcessFriendRequest()
+            CoreGui = game:GetService("CoreGui")
+            -- ชื่อ modal ต่างกันตามเวอร์ชัน -> เผื่อชื่อ แล้ว fallback เป็น scan ทั้ง CoreGui
+            local modal = CoreGui:FindFirstChild("SendFriendRequestModal", true)
+                or CoreGui:FindFirstChild("FriendRequestModal", true)
+                or CoreGui:FindFirstChild("AlertModal", true)
+
+            local buttons = modal and modal:FindFirstChild("Buttons", true)
+
+            -- ถ้าหาไม่เจอ ให้ scan หา container "Buttons" ที่มีปุ่ม send request
+            if not buttons then
+                for _, obj in ipairs(CoreGui:GetDescendants()) do
+                    if obj.Name == "Buttons" and findFriendButton(obj) then
+                        buttons = obj
+                        break
+                    end
+                end
+            end
+            if not buttons then return false end
+
+            local confirm = findFriendButton(buttons)
+            if not confirm then return false end
+
+            interact(confirm)             -- ลองคีย์บอร์ดก่อน
+            task.wait(0.3)
+            if confirm.Parent then        -- ถ้า modal ยังอยู่ = ยังไม่สำเร็จ -> ลองเมาส์
+                interact_2(confirm)
+            end
+            return true
+        end
+
+        local requested = {}       -- จำ UserId ที่ส่งคำขอไปแล้ว กันส่งซ้ำ
+        local friendedOnce = false -- แอดเพื่อนแค่รอบเดียวตอนเข้าเกม
 
         while true do
             task.wait(1)
@@ -149,14 +200,26 @@ task.spawn(function()
             end)
 
             if InThirdSea() then
-                -- โหมด Sea 3 (World 3): หยุดบล็อก -> แอดเพื่อนทุกคนแทน
-                pcall(function()
-                    for _, player in ipairs(Players:GetPlayers()) do
-                        if player == LocalPlayer or IsFriend(player) then continue end
-                        ProcessAddFriend(player)
-                        task.wait(1)              -- เว้นจังหวะกันโดน rate limit
-                    end
-                end)
+                -- โหมด Sea 3 (World 3): หยุดบล็อก -> แอดเพื่อนทุกคน "รอบเดียว" แล้วหยุด
+                if not friendedOnce then
+                    pcall(function()
+                        for _, player in ipairs(Players:GetPlayers()) do
+                            if player == LocalPlayer or IsFriend(player) or requested[player.UserId] then continue end
+
+                            local attemp = 0
+                            local done = false
+                            repeat
+                                ProcessAddFriend(player)      -- เปิด prompt "Send Friend Request?"
+                                task.wait(1)                  -- รอ modal เด้ง
+                                pcall(function() done = ProcessFriendRequest() end)  -- กด Send Request
+                                attemp = attemp + 1
+                                task.wait(0.5)
+                            until attemp >= 3 or done
+                            requested[player.UserId] = true   -- ส่งแล้ว ไม่ต้องส่งซ้ำ
+                        end
+                    end)
+                    friendedOnce = true   -- ครบทุกคน 1 รอบแล้ว -> หยุด ไม่ทำอีก
+                end
             else
                 -- วนบล็อกผู้เล่นทุกคน (แมพอื่น ๆ)
                 pcall(function()
@@ -177,6 +240,7 @@ task.spawn(function()
         end
     end)
 end)
+
 
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
