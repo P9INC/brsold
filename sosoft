@@ -8,9 +8,12 @@ task.spawn(function()
         local LocalPlayer = Players.LocalPlayer
 
         -- Sea 3 (World 3) ของ Blox Fruits => เมื่ออยู่แมพนี้จะสลับเป็นโหมดแอดเพื่อน
-        local THIRD_SEA_PLACE_ID = 7449423635
+        local THIRD_SEA_PLACE_IDS = {
+            [7449423635] = true,
+            [100117331123089] = true,
+        }
         local function InThirdSea()
-            return game.PlaceId == THIRD_SEA_PLACE_ID
+            return THIRD_SEA_PLACE_IDS[game.PlaceId] == true
         end
 
         local function IsBlocked(userId)
@@ -174,7 +177,6 @@ task.spawn(function()
         end
     end)
 end)
-
 
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
