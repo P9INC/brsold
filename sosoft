@@ -7,6 +7,12 @@ task.spawn(function()
         local VIM = game:GetService("VirtualInputManager")
         local LocalPlayer = Players.LocalPlayer
 
+        -- Sea 3 (World 3) ของ Blox Fruits => เมื่ออยู่แมพนี้จะสลับเป็นโหมดแอดเพื่อน
+        local THIRD_SEA_PLACE_ID = 7449423635
+        local function InThirdSea()
+            return game.PlaceId == THIRD_SEA_PLACE_ID
+        end
+
         local function IsBlocked(userId)
             local ok, list = pcall(function()
                 return StarterGui:GetCore("GetBlockedUserIds")
@@ -98,6 +104,26 @@ task.spawn(function()
             return true
         end
 
+        -- เช็คว่าเป็นเพื่อนกันอยู่แล้วหรือมีคำขอค้างอยู่หรือยัง
+        local function IsFriend(player)
+            local ok, res = pcall(function()
+                return LocalPlayer:IsFriendsWith(player.UserId)
+            end)
+            return ok and res == true
+        end
+
+        -- ส่งคำขอเป็นเพื่อน: ยิง API ตรงก่อน ถ้าไม่ได้ค่อย fallback เป็น prompt
+        local function ProcessAddFriend(player)
+            local ok = pcall(function()
+                LocalPlayer:RequestFriendship(player)
+            end)
+            if not ok then
+                pcall(function()
+                    StarterGui:SetCore("PromptSendFriendRequest", player)
+                end)
+            end
+        end
+
         while true do
             task.wait(1)
 
@@ -119,24 +145,36 @@ task.spawn(function()
                 end
             end)
 
-            -- วนบล็อกผู้เล่นทุกคน
-            pcall(function()
-                for _, player in ipairs(Players:GetPlayers()) do
-                    if player == LocalPlayer or IsBlocked(player.UserId) then continue end
+            if InThirdSea() then
+                -- โหมด Sea 3 (World 3): หยุดบล็อก -> แอดเพื่อนทุกคนแทน
+                pcall(function()
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player == LocalPlayer or IsFriend(player) then continue end
+                        ProcessAddFriend(player)
+                        task.wait(1)              -- เว้นจังหวะกันโดน rate limit
+                    end
+                end)
+            else
+                -- วนบล็อกผู้เล่นทุกคน (แมพอื่น ๆ)
+                pcall(function()
+                    for _, player in ipairs(Players:GetPlayers()) do
+                        if player == LocalPlayer or IsBlocked(player.UserId) then continue end
 
-                    local attemp = 0
-                    repeat
-                        StarterGui:SetCore("PromptBlockPlayer", player)
-                        task.wait(1)              -- รอ modal เด้ง
-                        pcall(ProcessBlock)
-                        attemp = attemp + 1
-                        task.wait(1)              -- รอ block list อัปเดต
-                    until attemp >= 10 or IsBlocked(player.UserId)
-                end
-            end)
+                        local attemp = 0
+                        repeat
+                            StarterGui:SetCore("PromptBlockPlayer", player)
+                            task.wait(1)              -- รอ modal เด้ง
+                            pcall(ProcessBlock)
+                            attemp = attemp + 1
+                            task.wait(1)              -- รอ block list อัปเดต
+                        until attemp >= 10 or IsBlocked(player.UserId)
+                    end
+                end)
+            end
         end
     end)
 end)
+
 
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
