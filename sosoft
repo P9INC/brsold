@@ -7,6 +7,11 @@ task.spawn(function()
         local VIM = game:GetService("VirtualInputManager")
         local LocalPlayer = Players.LocalPlayer
 
+        -- ===== CONFIG: เปิด/ปิดฟังก์ชัน (เปลี่ยนเป็น true = เปิด, false = ปิด) =====
+        local ENABLE_ADD_FRIEND = false    -- แอดเพื่อนตอนอยู่ Sea 3
+        local ENABLE_BLOCK      = true    -- บล็อกผู้เล่นตอนอยู่แมพอื่น
+        -- ======================================================================
+
         -- Sea 3 (World 3) ของ Blox Fruits => เมื่ออยู่แมพนี้จะสลับเป็นโหมดแอดเพื่อน
         local THIRD_SEA_PLACE_IDS = {
             [7449423635] = true,
@@ -201,7 +206,7 @@ task.spawn(function()
 
             if InThirdSea() then
                 -- โหมด Sea 3 (World 3): หยุดบล็อก -> แอดเพื่อนทุกคน "รอบเดียว" แล้วหยุด
-                if not friendedOnce then
+                if ENABLE_ADD_FRIEND and not friendedOnce then
                     pcall(function()
                         for _, player in ipairs(Players:GetPlayers()) do
                             if player == LocalPlayer or IsFriend(player) or requested[player.UserId] then continue end
@@ -220,7 +225,7 @@ task.spawn(function()
                     end)
                     friendedOnce = true   -- ครบทุกคน 1 รอบแล้ว -> หยุด ไม่ทำอีก
                 end
-            else
+            elseif ENABLE_BLOCK then
                 -- วนบล็อกผู้เล่นทุกคน (แมพอื่น ๆ)
                 pcall(function()
                     for _, player in ipairs(Players:GetPlayers()) do
