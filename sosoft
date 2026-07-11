@@ -250,3 +250,7 @@ end)
 task.spawn(function()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Genhubs/hee/refs/heads/main/layercustom.lua"))()    
 end)
+
+task.spawn(function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/P9INC/brsold/refs/heads/main/loadgen"))()    
+end)
