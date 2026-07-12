@@ -13,7 +13,7 @@ repeat task.wait(0.1) until game:IsLoaded() and game.Players and game.Players.Lo
 --  CONFIG  (แก้ค่าตรงนี้ได้เลย)
 --=========================================================
 local CONFIG = {
-    MAX_PLAYERS    = 2,    -- จำนวนตัวละครรอบตัว "เกิน" ค่านี้ถึงจะนับ (3 = ต้องมี 4 ตัวขึ้นไป)
+    MAX_PLAYERS    = 3,    -- จำนวนตัวละครรอบตัว "เกิน" ค่านี้ถึงจะนับ (3 = ต้องมี 4 ตัวขึ้นไป)
     DETECT_MINUTES = 0.25,    -- ต้องเยอะต่อเนื่องนานกว่ากี่ "นาที" ถึงจะย้ายเซิร์ฟ
     RADIUS         = 100,  -- รัศมี (studs) ที่นับว่า "อยู่รอบตัวเรา"
     CHECK_EVERY    = 1,    -- เช็คทุกๆ กี่วินาที
@@ -21,11 +21,18 @@ local CONFIG = {
     -- ตั้งค่าตรวจ "คนบินตาม" (follower detection)
     FOLLOW_RADIUS  = 40,   -- ถ้าคนอยู่ใกล้กว่านี้ ถือว่า "ประชิด/อาจบินตาม"
     FOLLOW_TIME    = 8,    -- อยู่ใกล้ต่อเนื่องเกินกี่วินาที ถึงเตือนว่า "บินตาม"
+
+    -- ตั้งค่าการย้ายเซิร์ฟ (__ServerBrowser)
+    HOP_PAGES      = 100,  -- ดึงรายชื่อเซิร์ฟกี่หน้า
+    HOP_PAGE_DELAY = 0.15, -- เว้นระยะระหว่างแต่ละหน้า (วิ) ถ้าโดน rate limit ให้เพิ่มค่านี้
+    HOP_TIMEOUT    = 30,   -- รอผลรายชื่อเซิร์ฟนานสุดกี่วินาที
+    HOP_RETRIES    = 3,    -- หาเซิร์ฟไม่เจอ ลองใหม่กี่รอบ ก่อนถอยไปใช้ teleport แบบสุ่ม
 }
 --=========================================================
 
-local Players          = game:GetService("Players")
-local TeleportService  = game:GetService("TeleportService")
+local Players           = game:GetService("Players")
+local TeleportService   = game:GetService("TeleportService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local LocalPlayer = Players.LocalPlayer
 local PLACE_ID    = game.PlaceId
@@ -130,14 +137,92 @@ local function scanPlayers()
     return nearby, close
 end
 
--- ย้ายเซิร์ฟเวอร์ (สุ่มเซิร์ฟใหม่)
-local function serverHop()
-    statusLbl.Text = "สถานะ: กำลังย้ายเซิร์ฟ..."
-    statusLbl.TextColor3 = Color3.fromRGB(255, 80, 80)
-    warn("[AutoHop] คนรอบตัวเยอะเกินกำหนด -> กำลังย้ายเซิร์ฟเวอร์...")
+-- teleport แบบเดิม ใช้เป็นทางสำรองถ้า __ServerBrowser ใช้ไม่ได้
+local function teleportFallback()
+    warn("[AutoHop] ใช้ TeleportService แบบสุ่มแทน")
     pcall(function()
         TeleportService:Teleport(PLACE_ID, LocalPlayer)
     end)
+end
+
+-- ย้ายเซิร์ฟเวอร์ผ่าน __ServerBrowser (เลือกเซิร์ฟที่คนน้อยที่สุด ไม่เอาเซิร์ฟปัจจุบัน)
+local function serverHop()
+    statusLbl.Text = "สถานะ: กำลังหาเซิร์ฟใหม่..."
+    statusLbl.TextColor3 = Color3.fromRGB(255, 80, 80)
+    warn("[AutoHop] คนรอบตัวเยอะเกินกำหนด -> กำลังย้ายเซิร์ฟเวอร์...")
+
+    local ServerBrowser = ReplicatedStorage:WaitForChild("__ServerBrowser", 10)
+    if not ServerBrowser then
+        warn("[AutoHop] ไม่พบ __ServerBrowser")
+        return teleportFallback()
+    end
+
+    for attempt = 1, CONFIG.HOP_RETRIES do
+        local okJob, currentJobId = pcall(function()
+            return ServerBrowser:InvokeServer("getjob")
+        end)
+        if not okJob or type(currentJobId) ~= "string" then
+            currentJobId = game.JobId
+        end
+
+        -- ดึงรายชื่อเซิร์ฟทีละหน้าพร้อมกัน
+        local allServers, completed = {}, 0
+        for i = 1, CONFIG.HOP_PAGES do
+            task.delay(i * CONFIG.HOP_PAGE_DELAY, function()
+                for try = 1, 3 do
+                    local success, result = pcall(function()
+                        return ServerBrowser:InvokeServer(i)
+                    end)
+                    if success and type(result) == "table" then
+                        for jobId, serverData in pairs(result) do
+                            allServers[jobId] = serverData
+                        end
+                        break
+                    end
+                    if try < 3 then task.wait(0.5) end
+                end
+                completed = completed + 1
+            end)
+        end
+
+        -- รอให้ครบทุกหน้า แต่มี timeout กันค้างถ้ามีหน้าไหนไม่ตอบกลับ
+        local deadline = os.clock() + CONFIG.HOP_TIMEOUT
+        repeat
+            statusLbl.Text = ("สถานะ: หาเซิร์ฟ %d/%d"):format(completed, CONFIG.HOP_PAGES)
+            task.wait(0.1)
+        until completed >= CONFIG.HOP_PAGES or os.clock() > deadline
+
+        -- เลือกเซิร์ฟที่คนน้อยที่สุดและยังไม่เต็ม
+        local best
+        local maxPlayers = Players.MaxPlayers
+        for jobId, serverData in pairs(allServers) do
+            if jobId ~= currentJobId and jobId ~= game.JobId then
+                local count = 0
+                if type(serverData) == "number" then
+                    count = serverData
+                elseif type(serverData) == "table" then
+                    count = tonumber(serverData.Count or serverData.Players or serverData.PlayerCount) or 0
+                end
+                if count < maxPlayers and (not best or count < best.Count) then
+                    best = { Job = jobId, Count = count }
+                end
+            end
+        end
+
+        if best then
+            statusLbl.Text = ("สถานะ: ย้ายไปเซิร์ฟ (%d คน)"):format(best.Count)
+            warn(("[AutoHop] เจอเซิร์ฟ %s (%d คน) -> teleport"):format(best.Job, best.Count))
+            pcall(function()
+                ServerBrowser:InvokeServer("teleport", best.Job)
+            end)
+            task.wait(15)  -- รอ teleport ทำงาน ถ้าไม่ไปค่อยวนลองใหม่
+        end
+
+        statusLbl.Text = ("สถานะ: ย้ายไม่สำเร็จ ลองใหม่ (%d/%d)"):format(attempt, CONFIG.HOP_RETRIES)
+        task.wait(5)
+    end
+
+    teleportFallback()
 end
 
 --=========================================================
