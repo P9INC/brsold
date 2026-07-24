@@ -40,6 +40,7 @@ getgenv().QuartyzScript = {
             -- u can configs add mores/remove and must end with , (comma symbol)
         },
         ["Normal"] = { -- it just a normal fruit list
+            "Dough-Dough",
             "Magma-Magma",
             "Ice-Ice",
             -- u can configs add mores/remove and must end with , (comma symbol)
@@ -59,7 +60,7 @@ getgenv().QuartyzScript = {
     },
     ["IdleCheck"] = 300, -- every (x) seconds if not moving rejoin
     ["Swords"] = {
-        ["Shark Anchor"] = false
+        ["Shark Anchor"] = true
     },
 
     ["Fragments Cap"] = 50000
