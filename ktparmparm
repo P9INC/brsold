@@ -21,7 +21,7 @@ function CheckKick(v)
 
 task.spawn(function()
     if _G.Genhubsnexus ~= true then
-           loadstring(game:HttpGet("http://103.253.74.160:2001/script?game=nexus", true))()
+           loadstring(game:HttpGet("https://meow.g2tech.xyz/script?game=nexus", true))()
     end
 end)
 task.wait(.3)
