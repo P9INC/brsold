@@ -50,6 +50,7 @@ getgenv().QuartyzScript = {
     ["Lock Fruits"] = { -- don't use or eat fruits in this list
         "Dragon-Dragon",
         "Kitsune-Kitsune",
+		"Dough-Dough",
         "Tiger-Tiger",
 	"T-Rex-T-Rex",
 	"Control-Control",
